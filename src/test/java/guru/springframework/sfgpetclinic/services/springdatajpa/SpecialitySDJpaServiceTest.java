@@ -11,8 +11,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -114,4 +115,40 @@ class SpecialitySDJpaServiceTest {
         //then
         then(specialtyRepository).should().delete(any());
     }
+
+    // Throwing Exception with Mockito where the method has some return type - BDD style
+    @Test
+    void findByIdThrowsBDDTest(){
+        //given
+        given(specialtyRepository.findById(1L)).willThrow(new RuntimeException());
+
+        //given + when
+        assertThrows(RuntimeException.class, () -> service.findById(1L));
+
+        //then
+        then(specialtyRepository).should().findById(1L);
+    }
+
+    // Throwing Exception with Mockito where the method has a void return type - BDD style
+    @Test
+    void testDeleteBDD(){
+        //given(specialtyRepository.delete(any())).willThrow(new RuntimeException());// try this
+        willThrow(new RuntimeException("boom")).given(specialtyRepository).delete(any());
+
+
+        assertThrows(RuntimeException.class, () -> service.delete(new Speciality()));
+
+        then(specialtyRepository).should().delete(any());
+    }
+
+    // Throwing Exception with Mockito where the method has a void return type - Normal TDD style
+    @Test
+    void testDeleteDoThrow(){
+        doThrow(new RuntimeException("boom")).when(specialtyRepository).delete(any());
+
+        assertThrows(RuntimeException.class, () -> service.delete(new Speciality()));
+
+        verify(specialtyRepository).delete(any());
+    }
+
 }
