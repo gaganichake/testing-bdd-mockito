@@ -4,10 +4,12 @@ import guru.springframework.sfgpetclinic.model.Pet;
 import guru.springframework.sfgpetclinic.model.Visit;
 import guru.springframework.sfgpetclinic.services.PetService;
 import guru.springframework.sfgpetclinic.services.VisitService;
+import guru.springframework.sfgpetclinic.services.map.PetMapService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashMap;
@@ -25,8 +27,11 @@ class VisitControllerTest {
     @Mock
     VisitService visitService;
 
-    @Mock
-    PetService petService;
+//    @Mock
+//    PetService petService;
+
+    @Spy
+    PetMapService petService; // A real implementation
 
     @InjectMocks
     VisitController visitController;
@@ -36,7 +41,9 @@ class VisitControllerTest {
         //given
         Map<String, Object> model = new HashMap<>();
         Pet pet = new Pet(1L);
-        given(petService.findById(anyLong())).willReturn(pet);
+        petService.save(pet);
+//        given(petService.findById(anyLong())).willReturn(pet);
+        given(petService.findById(anyLong())).willCallRealMethod();
 
         //when
         Visit visit = visitController.loadPetWithVisit(1L, new HashMap<>());
@@ -46,6 +53,5 @@ class VisitControllerTest {
         assertThat(visit).isNotNull();
         assertThat(visit.getPet()).isNotNull();
         assertThat(visit.getPet().getId()).isEqualTo(1L);
-
     }
 }
