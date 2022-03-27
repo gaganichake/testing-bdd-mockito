@@ -17,8 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OwnerControllerTest {
@@ -75,6 +74,7 @@ class OwnerControllerTest {
         then(ownerService).should().findAllByLastNameLike(anyString());
         assertThat("%Buck%").isEqualTo(stringArgumentCaptor.getValue());// Assert changing value of an argument (Last name) using ArgumentCaptor
         assertThat("redirect:/owners/1").isEqualTo(view);
+        verifyZeroInteractions(model);
     }
 
     @Test
@@ -89,6 +89,7 @@ class OwnerControllerTest {
         then(ownerService).should().findAllByLastNameLike(anyString());
         assertThat("%NotFound%").isEqualTo(stringArgumentCaptor.getValue());// Assert changing value of an argument (Last name) using ArgumentCaptor
         assertThat("owners/findOwners").isEqualTo(view);
+        verifyZeroInteractions(model);
     }
 
     @Test
@@ -107,7 +108,8 @@ class OwnerControllerTest {
 
         // Want to insure the service is called before the model is called. Here the order of statements matters.
         inOrder.verify(ownerService).findAllByLastNameLike(anyString());
-        inOrder.verify(model).addAttribute(anyString(), anyList());
+        inOrder.verify(model, times(1)).addAttribute(anyString(), anyList());
+        verifyNoMoreInteractions( model);
     }
 
     @Test
