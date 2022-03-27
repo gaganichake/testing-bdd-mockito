@@ -8,7 +8,7 @@
     <artifactId>tb2g-bdd-mockito</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <name>tb2g-bdd-mockito</name>
+    <name>test-bdd-mockito</name>
     <description>Testing Java with JUnit 5</description>
 
     <organization>
