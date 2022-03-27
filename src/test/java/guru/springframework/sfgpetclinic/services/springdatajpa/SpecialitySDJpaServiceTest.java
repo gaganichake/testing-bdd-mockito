@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SpecialitySDJpaServiceTest {
 
-    @Mock
+    @Mock(lenient = true)
     SpecialtyRepository specialtyRepository;
 
     @InjectMocks
@@ -149,6 +150,43 @@ class SpecialitySDJpaServiceTest {
         assertThrows(RuntimeException.class, () -> service.delete(new Speciality()));
 
         verify(specialtyRepository).delete(any());
+    }
+
+    @Test
+    void testSaveLamda(){
+        //give
+        final String MATCH_ME = "MATCH_ME";
+        Speciality savedSpeciality = new Speciality();
+        savedSpeciality.setId(1L);
+        // Need mock to only return on match MATCH_ME string
+        given(specialtyRepository.save(argThat(argument -> argument.getDescription().equals(MATCH_ME)))).willReturn(savedSpeciality);
+
+        //when
+        Speciality speciality = new Speciality();
+        speciality.setDescription(MATCH_ME);
+        Speciality returnedSpeciality = service.save(speciality);
+
+        //then
+        assertThat(returnedSpeciality.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void testSaveLamdaNotMatch(){
+        //give
+        final String MATCH_ME = "MATCH_ME";
+        Speciality savedSpeciality = new Speciality();
+        savedSpeciality.setId(1L);
+        // Need mock to only return on match MATCH_ME string
+        given(specialtyRepository.save(argThat(argument -> argument.getDescription().equals(MATCH_ME)))).willReturn(savedSpeciality);
+
+        //when
+        Speciality speciality = new Speciality();
+        speciality.setDescription("MATCH_ME_NOT");
+        Speciality returnedSpeciality = service.save(speciality);
+
+        //then
+        assertNull(returnedSpeciality); // will return null object because the String will not match
+        // Also see @Mock(lenient = true)
     }
 
 }
