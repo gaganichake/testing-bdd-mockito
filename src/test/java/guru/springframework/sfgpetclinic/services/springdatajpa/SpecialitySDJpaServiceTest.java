@@ -36,6 +36,19 @@ class SpecialitySDJpaServiceTest {
         then(specialtyRepository).should().delete(any(Speciality.class));
     }
 
+    // Verify interactions complete within as specified time with Mockito timeout
+    @Test
+    void testDeleteByObjectTimeout() {
+        //given
+        Speciality speciality = new Speciality();
+
+        //when
+        service.delete(speciality);
+
+        //then
+        then(specialtyRepository).should(timeout(5000)).delete(any(Speciality.class));
+    }
+
     @Test
     void findByIdTest() {
         //given
