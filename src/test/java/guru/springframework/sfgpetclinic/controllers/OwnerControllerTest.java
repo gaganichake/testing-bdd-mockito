@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +30,9 @@ class OwnerControllerTest {
 
     @Mock
     BindingResult bindingResult;
+
+    @Mock
+    Model model;
 
     @InjectMocks
     OwnerController controller;
@@ -92,14 +95,19 @@ class OwnerControllerTest {
     void processFindFormWildCardFound() {
         //given
         List<Owner> ownerList = new ArrayList<>();
+        InOrder inOrder = inOrder(ownerService, model); // the order arguments in this function does not matter.
 
         //when
-        String view = controller.processFindForm(new Owner(1L, "Joe", "Found"), bindingResult, Mockito.mock(Model.class));// Adding inline mock object
+        String view = controller.processFindForm(new Owner(1L, "Joe", "Found"), bindingResult, model);// Adding inline mock object
 
         //then
         then(ownerService).should().findAllByLastNameLike(anyString());
         assertThat("%Found%").isEqualTo(stringArgumentCaptor.getValue());// Assert changing value of an argument (Last name) using ArgumentCaptor
         assertThat("owners/ownersList").isEqualTo(view);
+
+        // Want to insure the service is called before the model is called. Here the order of statements matters.
+        inOrder.verify(ownerService).findAllByLastNameLike(anyString());
+        inOrder.verify(model).addAttribute(anyString(), anyList());
     }
 
     @Test
